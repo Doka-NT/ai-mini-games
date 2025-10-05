@@ -15,6 +15,10 @@ class Game {
         this.playerSpeed = 5;
         this.currentSpeed = 0;
         this.maxSpeed = 200;
+        // Заглушки для фона и ускорения (мелодии)
+        this.bgMusicPlaying = false;
+        this.accelSoundPlaying = false;
+
         // Более отзывчивые параметры для удобной игры:
         this.acceleration = 1.2;    // более быстрое ускорение
         this.deceleration = 0.6;    // более заметное торможение при удержании вниз
@@ -88,12 +92,20 @@ class Game {
 
     handleKeyDown(e) {
         if (this.keys.hasOwnProperty(e.key)) {
+            // Добавляем диагностику ускорения (запуск звука только если не был нажат до этого)
+            if (e.key === "ArrowUp" && !this.keys.ArrowUp) {
+                this.playAccelSound();
+            }
             this.keys[e.key] = true;
         }
     }
 
     handleKeyUp(e) {
         if (this.keys.hasOwnProperty(e.key)) {
+            // Прерывание ускорения — останавливаем звук
+            if (e.key === "ArrowUp") {
+                this.stopAccelSound();
+            }
             this.keys[e.key] = false;
         }
     }
@@ -105,6 +117,10 @@ class Game {
                 clearTimeout(this.spawnTimer);
                 this.spawnTimer = null;
             }
+
+            // Диагностика: старт фоновой музыки и остановка звука ускорения
+            this.playBgMusic();
+            this.stopAccelSound();
 
             this.isPlaying = true;
             this.score = 0;
@@ -454,6 +470,10 @@ class Game {
 
     gameOver() {
         this.isPlaying = false;
+        // Диагностика: остановка фоновой музыки и звука ускорения
+        this.stopBgMusic();
+        this.stopAccelSound();
+
         // отменяем таймер спавна на случай, если он запланирован
         if (this.spawnTimer) {
             clearTimeout(this.spawnTimer);
@@ -478,6 +498,164 @@ class Game {
         // Сбрасываем позицию центральной линии
         if (this.roadLines) {
             this.roadLines.style.backgroundPosition = '0 0';
+        }
+    }
+    // --- Генерация фоновой музыки и звука ускорения через Web Audio API ---
+    playBgMusic() {
+        if (!this.bgMusicPlaying) {
+            this.bgMusicPlaying = true;
+            try {
+                if (!this.audioCtx) {
+                    this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                // Весёлая быстрая мелодия: последовательность коротких «major» аккордов, темп — выше
+                if (this.bgMusicNotes) {
+                    if (this.audioCtx.state === 'suspended') this.audioCtx.resume();
+                    return;
+                }
+                this.bgGain = this.audioCtx.createGain();
+                this.bgGain.gain.value = 0.045; // ещё тише (≈24% от начального значения)
+                this.bgGain.connect(this.audioCtx.destination);
+                // Мажорные (весёлые) аккорды маленькой продолжительности
+                // Темп — каждая нота 0.18-0.24 с, аккорды быстро чередуются
+                this.bgMusicNotes = [
+                    // (C E G), (F A C), (G B D), (A C# E) — цикл по кругу
+                    { freq: [261.63, 329.63, 392.0], duration: 0.18 },   // C major
+                    { freq: [349.23, 440.0, 523.25], duration: 0.18 },   // F major (F, A, C)
+                    { freq: [392.0, 493.88, 587.33], duration: 0.18 },   // G major (G, B, D)
+                    { freq: [440.0, 554.37, 659.26], duration: 0.20 },   // A major (A, C#, E)
+                    { freq: [392.0, 493.88, 587.33], duration: 0.18 },
+                    { freq: [349.23, 440.0, 523.25], duration: 0.22 }
+                ];
+                this.bgMusicStep = 0;
+                this._bgMusicPlaying = true;
+                const playStep = () => {
+                    if (!this._bgMusicPlaying) return;
+                    const noteObj = this.bgMusicNotes[this.bgMusicStep % this.bgMusicNotes.length];
+                    const now = this.audioCtx.currentTime;
+                    // Мажорный аккорд — одновременно три осциллятора
+                    let oscs = noteObj.freq.map(fq => {
+                        const osc = this.audioCtx.createOscillator();
+                        osc.type = "sawtooth";
+                        osc.frequency.value = fq;
+                        osc.connect(this.bgGain);
+                        osc.start(now);
+                        osc.stop(now + noteObj.duration);
+                        return osc;
+                    });
+                    oscs.forEach(o => {
+                        o.onended = () => o.disconnect();
+                    });
+                    if (!this._bgMusicPlaying) {
+                        oscs.forEach(o => o.disconnect());
+                        return;
+                    }
+                    this.bgMusicStep = (this.bgMusicStep + 1) % this.bgMusicNotes.length;
+                    setTimeout(playStep, noteObj.duration * 900); // чуть быстрее break между аккордами
+                    console.log('[AUDIO] Фоновая музыка: аккорд', noteObj.freq, 'продолжительность', noteObj.duration);
+                };
+                playStep();
+                console.log('[AUDIO] Генерируемая быстрая фоновая музыка: старт');
+            } catch (e) {
+                console.error('[AUDIO ERROR] Не удалось сгенерировать фоновую музыку:', e);
+            }
+        }
+    }
+    stopBgMusic() {
+        if (this.bgMusicPlaying) {
+            this.bgMusicPlaying = false;
+            this._bgMusicPlaying = false;
+            try {
+                if (this.audioCtx && this.audioCtx.state !== 'closed') {
+                    if (this.bgGain) this.bgGain.gain.value = 0;
+                }
+                console.log('[AUDIO] Фоновая музыка: остановлена (генерация)');
+            } catch (e) {
+                console.error('[AUDIO ERROR] Не удалось остановить фоновую музыку:', e);
+            }
+        }
+    }
+    playAccelSound() {
+        if (this._accelOsc) return; // Уже ревёт
+        try {
+            if (!this.audioCtx) {
+                this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            // Создадим "рев спорткара" — sawtooth + чуть дрожащий pitch + фильтр + немного гармоник
+            const osc = this.audioCtx.createOscillator();
+            osc.type = "sawtooth";
+            // Базовая частота — около 170-300Гц (низкий, басистый рев V8), при ускорении — чуть повышается
+            osc.frequency.setValueAtTime(190, this.audioCtx.currentTime);
+
+            // LFO (невысокий LFO-модулятор для эффекта "дрожания" двигателя)
+            const lfo = this.audioCtx.createOscillator();
+            lfo.type = "triangle";
+            lfo.frequency.value = 17; // 17 Гц — не идеально, но для web OK
+            const lfoGain = this.audioCtx.createGain();
+            lfoGain.gain.value = 21; // глубина LFO колебания
+            lfo.connect(lfoGain);
+            lfoGain.connect(osc.frequency);
+
+            // Фильтр для подчистки "ревущего" звука
+            const filter = this.audioCtx.createBiquadFilter();
+            filter.type = "lowpass";
+            filter.frequency.value = 1200;
+
+            // Основная огибающая громкости
+            const gain = this.audioCtx.createGain();
+            gain.gain.value = 0.22;
+
+            osc.connect(filter).connect(gain).connect(this.audioCtx.destination);
+
+            osc.start();
+            lfo.start();
+
+            this._accelOsc = osc;
+            this._accelLFO = lfo;
+            this._accelLFOGain = lfoGain;
+            this._accelGain = gain;
+            this._accelFilter = filter;
+
+            console.log('[AUDIO] Звук ускорения: рев спорткара включён');
+        } catch (e) {
+            console.error('[AUDIO ERROR] Не удалось сгенерировать звук ускорения:', e);
+        }
+    }
+    stopAccelSound() {
+        // Отключаем "рев" плавно
+        if (this._accelOsc) {
+            const osc = this._accelOsc;
+            const lfo = this._accelLFO;
+            const lfoGain = this._accelLFOGain;
+            const gain = this._accelGain;
+            try {
+                if (gain) {
+                    gain.gain.linearRampToValueAtTime(0, this.audioCtx.currentTime + 0.08);
+                }
+                setTimeout(() => {
+                    try {
+                        osc.stop();
+                        osc.disconnect();
+                        if (lfo) lfo.stop();
+                        if (lfo) lfo.disconnect();
+                        if (lfoGain) lfoGain.disconnect();
+                        if (gain) gain.disconnect();
+                        if (this._accelFilter) this._accelFilter.disconnect();
+                    } catch (e) {}
+                    this._accelOsc = null;
+                    this._accelLFO = null;
+                    this._accelLFOGain = null;
+                    this._accelGain = null;
+                    this._accelFilter = null;
+                    console.log('[AUDIO] Звук ускорения: рев спорткара выключен');
+                }, 95);
+            } catch (e) {
+                this._accelOsc = null;
+                this._accelLFO = null;
+                this._accelLFOGain = null;
+                this._accelGain = null;
+                this._accelFilter = null;
+            }
         }
     }
 }
