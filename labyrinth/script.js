@@ -89,7 +89,7 @@ let playerPos = {
     x: 1,
     y: 1,
     lastMoveTime: 0,        // время последнего движения
-    moveDelay: 150          // задержка между ходами в мс
+    moveDelay: 0          // задержка между ходами в мс
 };
 
 // Состояние клавиш
@@ -103,7 +103,7 @@ let keyStates = {
 // Создаем пустой лабиринт
 let maze = Array(ROWS).fill().map(() => Array(COLS).fill(1));
 
-// Генерация лабиринта с использованием алгоритма Recursive Backtracking
+// Генерация лабиринта с использованием алгоритма Recursive Backtracking и дополнительными тупиками
 function generateMaze(row, col) {
     maze[row][col] = 0;
     
@@ -118,16 +118,39 @@ function generateMaze(row, col) {
     // Перемешиваем направления для случайности
     shuffleArray(directions);
     
+    // Счетчик для отслеживания количества прорубленных путей
+    let pathsCreated = 0;
+    
     // Проверяем каждое направление
     for (let [dy, dx] of directions) {
         const newRow = row + dy;
         const newCol = col + dx;
         
         if (newRow > 0 && newRow < ROWS - 1 && newCol > 0 && newCol < COLS - 1 && maze[newRow][newCol] === 1) {
+            // Создаем дополнительные тупики с вероятностью 25%
+            const shouldCreateDeadEnd = Math.random() < 0.40 && pathsCreated > 0;
+            
             // Прорубаем путь
             maze[row + dy/2][col + dx/2] = 0;
             maze[newRow][newCol] = 0;
-            generateMaze(newRow, newCol);
+            pathsCreated++;
+            
+            if (shouldCreateDeadEnd) {
+                // Создаем тупик
+                const deadEndDirections = directions.filter(([ddy, ddx]) => 
+                    newRow + ddy > 0 && newRow + ddy < ROWS - 1 && 
+                    newCol + ddx > 0 && newCol + ddx < COLS - 1 && 
+                    maze[newRow + ddy][newCol + ddx] === 1
+                );
+                
+                if (deadEndDirections.length > 0) {
+                    const [ddy, ddx] = deadEndDirections[Math.floor(Math.random() * deadEndDirections.length)];
+                    maze[newRow + ddy/2][newCol + ddx/2] = 0;
+                    maze[newRow + ddy][newCol + ddx] = 0;
+                }
+            } else {
+                generateMaze(newRow, newCol);
+            }
         }
     }
 }
