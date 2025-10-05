@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Gravity Garden — Гравитационный Сад</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Gravity Garden</h1>
+    <p class="lead">Посади гравитационные «растения» и направь семя в цель — используй притяжение и отталкивание, чтобы создать узоры и пройти уровень.</p>
+
+    <div class="controls">
+      <label>Режим: <select id="mode"><option value="attractor">Притягиватель</option><option value="repellor">Отталкиватель</option></select></label>
+      <button id="btn-start">Запустить</button>
+      <button id="btn-pause">Пауза</button>
+      <button id="btn-reset">Сброс</button>
+      <button id="btn-clear">Очистить узор</button>
+      <button id="btn-export">Сохранить рисунок</button>
+      <span class="hint">Клик — добавить, Shift+клик — удалить</span>
+    </div>
+
+    <div class="canvas-wrap">
+      <canvas id="game" width="800" height="600"></canvas>
+    </div>
+
+    <p class="instructions">Цель: поместить семя (жёлтый) внутрь зелёного кольца. Используйте притягиватели (синие) и отталкиватели (красные). Каждая посадка оставляет след — создавайте картины!</p>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
