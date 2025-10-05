@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Pong — мини-игра</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Pong</h1>
+    <div class="hud">
+      <div id="score">Игрок: 0 — 0 : Компьютер</div>
+      <div class="controls">Клавиши: W/S и стрелки вверх/вниз. На телефоне тап — верх/низ</div>
+    </div>
+    <canvas id="game" width="800" height="480"></canvas>
+    <div class="buttons">
+      <button id="btn-start">Старт</button>
+      <button id="btn-reset">Сброс</button>
+    </div>
+    <p class="note">Лёгкая версия Pong с ИИ, можно играть вдвоём.</p>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
