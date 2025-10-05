@@ -24,6 +24,11 @@
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
+        .site-header{max-width:1200px;width:100%;text-align:center;margin-bottom:18px}
+        .subtitle{color:#cbd8ea;margin-top:-8px;margin-bottom:14px}
+        .meta{display:flex;gap:10px;justify-content:center;margin-bottom:8px}
+        .play-button.small{padding:8px 14px;border-radius:14px;font-size:0.9rem}
+
         .games-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -70,11 +75,20 @@
         .play-button:hover {
             background: linear-gradient(45deg, #45a049, #3d8b40);
         }
+        .site-footer{max-width:1200px;width:100%;margin-top:28px;text-align:center;color:#9fb0c8}
+        .small{font-size:0.9rem}
     </style>
 </head>
 <body>
-    <h1>Коллекция игр</h1>
-    
+    <header class="site-header">
+        <h1>Коллекция игр</h1>
+        <p class="subtitle">Небольшая подборка мини-игр — играйте прямо в браузере. Кликните «Играть» на карточке игры.</p>
+        <div class="meta">
+            <a href="README.md" class="play-button small">О проекте</a>
+            <a href="https://github.com/Doka-NT/ai-mini-games" class="play-button small" target="_blank" rel="noopener">GitHub</a>
+        </div>
+    </header>
+
     <div class="games-container">
         <div class="game-card">
             <h2>Змейка</h2>
@@ -106,5 +120,9 @@
             <a href="gravity-garden/index.html" class="play-button">Играть</a>
         </div>
     </div>
+
+    <footer class="site-footer">
+        <p class="small">© Doka-NT — AI Mini Games · Обновлено: 5 октября 2025</p>
+    </footer>
 </body>
 </html>
