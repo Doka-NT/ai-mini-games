@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гонки</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="stats">
+            <div class="score">Счёт: <span id="score">0</span></div>
+            <div class="speed">Скорость: <span id="speedometer">0</span> км/ч</div>
+        </div>
+        <div class="game">
+            <div class="road-container">
+                <div class="road-lines"></div>
+                <div class="road-sides"></div>
+            </div>
+            <div id="player">
+                <div class="headlight left"></div>
+                <div class="headlight right"></div>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="startButton">Начать игру</button>
+            <div class="controls-help">
+                ← → : Поворот
+                ↑ : Ускорение
+                ↓ : Торможение
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

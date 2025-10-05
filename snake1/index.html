@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Змейка</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <h1>Змейка</h1>
+    <div class="hud">
+      <div id="score">Счёт: 0</div>
+      <div id="highscore">Рекорд: 0</div>
+    </div>
+
+    <div class="board-wrap">
+      <canvas id="game" width="600" height="600"></canvas>
+      <div class="overlay" id="overlay">
+        <div id="message"></div>
+        <div class="controls">
+          <button id="btn-restart">Начать заново</button>
+          <button id="btn-pause">Пауза</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="mobile-controls" aria-hidden="true">
+      <button data-dir="up">↑</button>
+      <div>
+        <button data-dir="left">←</button>
+        <button data-dir="down">↓</button>
+        <button data-dir="right">→</button>
+      </div>
+    </div>
+
+    <p class="help">Управление: стрелки или WASD. На мобильных — кнопки. Поедайте еду, избегайте столкновений с телом.</p>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
