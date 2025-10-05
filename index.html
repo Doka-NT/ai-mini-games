@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Коллекция игр</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #1e1f26, #283655);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .games-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .game-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .game-card h2 {
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .game-card p {
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+
+        .play-button {
+            display: inline-block;
+            padding: 10px 30px;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            transition: background 0.3s ease;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(45deg, #45a049, #3d8b40);
+        }
+    </style>
+</head>
+<body>
+    <h1>Коллекция игр</h1>
+    
+    <div class="games-container">
+        <div class="game-card">
+            <h2>Змейка</h2>
+            <p>Классическая игра змейка. Собирайте еду и растите, не врезаясь в стены и в себя!</p>
+            <a href="snake1/index.html" class="play-button">Играть</a>
+        </div>
+
+        <div class="game-card">
+            <h2>Лабиринт</h2>
+            <p>Найдите выход из запутанного лабиринта. Проверьте свою сообразительность!</p>
+            <a href="labyrinth/index.html" class="play-button">Играть</a>
+        </div>
+
+        <div class="game-card">
+            <h2>Гонки</h2>
+            <p>Увлекательные гонки! Покажите своё мастерство вождения!</p>
+            <a href="racing/index.html" class="play-button">Играть</a>
+        </div>
+    </div>
+</body>
+</html>
