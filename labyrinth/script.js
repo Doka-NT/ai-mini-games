@@ -84,10 +84,20 @@ const PATH_COLOR = '#ecf0f1';
 const PLAYER_COLOR = '#e74c3c';
 const EXIT_COLOR = '#27ae60';
 
-// Позиция игрока
+// Позиция игрока и параметры движения
 let playerPos = {
     x: 1,
-    y: 1
+    y: 1,
+    lastMoveTime: 0,        // время последнего движения
+    moveDelay: 150          // задержка между ходами в мс
+};
+
+// Состояние клавиш
+let keyStates = {
+    ArrowUp: { pressed: false, lastPress: 0 },
+    ArrowDown: { pressed: false, lastPress: 0 },
+    ArrowLeft: { pressed: false, lastPress: 0 },
+    ArrowRight: { pressed: false, lastPress: 0 }
 };
 
 // Создаем пустой лабиринт
@@ -163,6 +173,13 @@ function drawMaze() {
 function movePlayer(dx, dy) {
     if (!audioCtx) initAudio();
     
+    // Проверяем задержку между ходами
+    const currentTime = Date.now();
+    if (currentTime - playerPos.lastMoveTime < playerPos.moveDelay) {
+        return;
+    }
+    playerPos.moving = true;
+    
     const newX = playerPos.x + dx;
     const newY = playerPos.y + dy;
     
@@ -171,6 +188,7 @@ function movePlayer(dx, dy) {
         if (maze[newY][newX] === 0) {
             playerPos.x = newX;
             playerPos.y = newY;
+            playerPos.lastMoveTime = currentTime;
             sounds.step.play();
             
             // Проверяем, достиг ли игрок выхода
@@ -182,45 +200,33 @@ function movePlayer(dx, dy) {
                 }, 500);
             }
         } else {
-            sounds.wall.play();
+            // Звук удара о стену тоже с задержкой
+            if (currentTime - playerPos.lastMoveTime >= playerPos.moveDelay) {
+                sounds.wall.play();
+                playerPos.lastMoveTime = currentTime;
+            }
         }
     }
     drawMaze();
 }
 
-// Отслеживание нажатых клавиш
-let keys = {
-    ArrowUp: false,
-    ArrowDown: false,
-    ArrowLeft: false,
-    ArrowRight: false
-};
-
 // Обработчики нажатия и отпускания клавиш
 document.addEventListener('keydown', (e) => {
-    if (keys.hasOwnProperty(e.key)) {
-        keys[e.key] = true;
+    switch(e.key) {
+        case 'ArrowUp':
+            movePlayer(0, -1);
+            break;
+        case 'ArrowDown':
+            movePlayer(0, 1);
+            break;
+        case 'ArrowLeft':
+            movePlayer(-1, 0);
+            break;
+        case 'ArrowRight':
+            movePlayer(1, 0);
+            break;
     }
 });
-
-document.addEventListener('keyup', (e) => {
-    if (keys.hasOwnProperty(e.key)) {
-        keys[e.key] = false;
-    }
-});
-
-// Функция обновления состояния игры
-function gameLoop() {
-    if (keys.ArrowUp) movePlayer(0, -1);
-    if (keys.ArrowDown) movePlayer(0, 1);
-    if (keys.ArrowLeft) movePlayer(-1, 0);
-    if (keys.ArrowRight) movePlayer(1, 0);
-    
-    requestAnimationFrame(gameLoop);
-}
-
-// Запускаем игровой цикл
-gameLoop();
 
 // Инициализация игры
 function initGame() {
@@ -230,10 +236,13 @@ function initGame() {
     // Генерируем лабиринт
     generateMaze(1, 1);
     
-    // Устанавливаем игрока на старт
+    // Устанавливаем игрока на старт, сохраняя параметры управления
+    const moveDelay = playerPos.moveDelay || 150;
     playerPos = {
         x: 1,
-        y: 1
+        y: 1,
+        lastMoveTime: 0,
+        moveDelay: moveDelay
     };
     
     // Отрисовываем начальное состояние
